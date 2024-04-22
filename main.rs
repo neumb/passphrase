@@ -17,7 +17,8 @@ impl Default for Config {
 
 static WORDLIST: &'static str = include_str!("eff_short_wordlist_1.txt");
 
-fn usage(filepath: &str) {
+fn usage() {
+    let filepath = env::args().next().unwrap();
     eprintln!("Usage: {} [-n | --num] [-s | --sep]", filepath);
     eprintln!();
     eprintln!("Options");
@@ -25,9 +26,9 @@ fn usage(filepath: &str) {
     eprintln!("--sep, -s    word separator");
 }
 
-fn main() {
+fn parse_args() -> Result<Config, ()> {
     let mut args = env::args();
-    let filepath = args.next().expect("program filepath");
+    args.next();
     let mut config = Config::default();
 
     while let Some(arg) = args.next() {
@@ -37,32 +38,39 @@ fn main() {
                     if let Ok(n) = next.parse::<usize>() {
                         config.num = n;
                     } else {
-                        usage(filepath.as_str());
-                        return;
+                        return Err(());
                     }
                 } else {
-                    usage(filepath.as_str());
-                    return;
+                    return Err(());
                 }
             }
-            "-s" | "-sep" => {
+            "-s" | "--sep" => {
                 if let Some(next) = args.next() {
                     config.sep = next;
                 } else {
-                    usage(filepath.as_str());
-                    return;
+                    return Err(());
                 }
             }
             _ => {
-                usage(filepath.as_str());
-                return;
+                return Err(());
             }
         }
     }
 
+    Ok(config)
+}
+
+fn main() {
     let mut rng = rand::thread_rng();
     let mut words = WORDLIST.lines().collect::<Vec<_>>();
     words.shuffle(&mut rng);
+    let config = match parse_args() {
+        Ok(cfg) => cfg,
+        _ => {
+            usage();
+            return;
+        }
+    };
 
     let passphrase = &words[0..config.num].join(config.sep.as_str());
 
