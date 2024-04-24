@@ -15,7 +15,7 @@ impl Default for Config {
     }
 }
 
-static WORDLIST: &'static str = include_str!("eff_short_wordlist_1.txt");
+include!(concat!(env!("OUT_DIR"), "/wordlist.rs"));
 
 fn usage() {
     let filepath = env::args().next().unwrap();
@@ -61,9 +61,6 @@ fn parse_args() -> Result<Config, ()> {
 }
 
 fn main() {
-    let mut rng = rand::thread_rng();
-    let mut words = WORDLIST.lines().collect::<Vec<_>>();
-    words.shuffle(&mut rng);
     let config = match parse_args() {
         Ok(cfg) => cfg,
         _ => {
@@ -71,8 +68,13 @@ fn main() {
             return;
         }
     };
+    let mut rng = rand::thread_rng();
+    let sample = WORDLIST
+        .choose_multiple(&mut rng, config.num)
+        .copied()
+        .collect::<Vec<_>>();
 
-    let passphrase = &words[0..config.num].join(config.sep.as_str());
+    let passphrase = sample.join(config.sep.as_str());
 
     println!("{}", passphrase);
 }
