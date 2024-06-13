@@ -10,7 +10,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             num: 4,
-            sep: "-".to_string(),
+            sep: " ".to_string(),
         }
     }
 }
