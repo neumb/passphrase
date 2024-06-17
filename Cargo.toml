@@ -1,5 +1,5 @@
 [package]
-name = "passphrase"
+name = "shphr"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,5 +9,5 @@ edition = "2021"
 rand = "0.8.5"
 
 [[bin]]
-name = "passphrase"
+name = "shphr"
 path = "main.rs"
